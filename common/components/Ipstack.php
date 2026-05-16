@@ -23,31 +23,37 @@ class Ipstack {
 
         // Get initial IP address of requester
         $ip = method_exists(Yii::$app->request, "getRemoteIP")?
-            Yii::$app->request->getRemoteIP(): null;
+            trim((string) Yii::$app->request->getRemoteIP()): null;
 
         // Check if request is forwarded via load balancer or cloudfront on behalf of user
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'];
 
             // as "X-Forwarded-For" is usually a list of IP addresses that have routed
-            $IParray = array_values(array_filter(explode(',', $forwardedFor)));
+            $IParray = array_values(array_filter(array_map('trim', explode(',', $forwardedFor))));
 
             // Get the first ip from forwarded array to get original requester
-            $ip = $IParray[0];
+            if (!empty($IParray)) {
+                $ip = $IParray[0];
+            }
         }
 
-        if (!$ip) {
+        if (!$ip || filter_var($ip, FILTER_VALIDATE_IP) === false) {
             return null;
         }
 
         // Build url used for ip check
         //$url = 'https://api.ipstack.com/' . $ip . '?access_key=' . $this->accessKey;
-        $url = 'https://ipinfo.io/' . $ip . '/json?token=' . $this->accessKey;
+        $url = 'https://ipinfo.io/' . rawurlencode($ip) . '/json?' . http_build_query([
+            'token' => $this->accessKey,
+        ], '', '&', PHP_QUERY_RFC3986);
 
         // Check if calling from localhost
         if ($ip == '::1' || $ip == '127.0.0.1') {
             //$url = 'https://api.ipstack.com/check?access_key=' . $this->accessKey;
-            $url = 'https://ipinfo.io/json?token=' . $this->accessKey;
+            $url = 'https://ipinfo.io/json?' . http_build_query([
+                'token' => $this->accessKey,
+            ], '', '&', PHP_QUERY_RFC3986);
         }
 
         // Return IP info from cache OR make a request for new data then cache
