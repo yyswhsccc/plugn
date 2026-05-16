@@ -99,7 +99,25 @@ class JWT
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://appleid.apple.com/auth/keys");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = json_decode(curl_exec($ch));
+        $responseContent = curl_exec($ch);
+        if ($responseContent === false) {
+            Yii::error('Unable to fetch Apple public keys: ' . curl_error($ch), __METHOD__);
+            curl_close($ch);
+            return [
+                'operation' => 'error',
+                'message' => Yii::t('job', 'Public key not found')
+            ];
+        }
+        curl_close($ch);
+
+        $response = json_decode($responseContent);
+        if (json_last_error() !== JSON_ERROR_NONE || !isset($response->keys) || !is_array($response->keys)) {
+            Yii::error('Invalid Apple public keys response.', __METHOD__);
+            return [
+                'operation' => 'error',
+                'message' => Yii::t('job', 'Public key not found')
+            ];
+        }
 
         foreach($response->keys as $data) {
 
