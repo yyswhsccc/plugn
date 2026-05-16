@@ -251,9 +251,18 @@ class DeliveryZoneController extends BaseController
         $longitude = Yii::$app->request->get('longitude');
         $postal_code = Yii::$app->request->get("postal_code");
 
+        if (!is_numeric($latitude) || !is_numeric($longitude)) {
+            return [
+                'operation' => 'error',
+                'message' => 'Latitude and longitude are invalid'
+            ];
+        }
+
         // call google api to get country name, lat, long
 
-        $url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' . $latitude .','. $longitude;
+        $url = 'https://maps.googleapis.com/maps/api/geocode/json?' . http_build_query([
+            'latlng' => $latitude . ',' . $longitude,
+        ], '', '&', PHP_QUERY_RFC3986);
 
         return City::addByGoogleAPIResponse($url, null, null, $postal_code);
     }
