@@ -35,7 +35,13 @@ class BlogManager extends BaseObject
 
     public function listPost($page, $query = '', $limit = 10) {
 
-        $deploySiteEndpoint = $this->apiEndpoint . "/post?limit=".$limit."&page=" . $page . '&query=' . $query;
+        $queryParams = http_build_query([
+            'limit' => $limit,
+            'page' => $page,
+            'query' => $query,
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $deploySiteEndpoint = $this->apiEndpoint . "/post?" . $queryParams;
 
         $client = new Client();
         $response = $client->createRequest()
@@ -178,7 +184,13 @@ class BlogManager extends BaseObject
      */
     public function listCategory($page, $query = '', $limit = 10) {
 
-        $deploySiteEndpoint = $this->apiEndpoint . "/category?limit=".$limit."&page=" . $page . '&query=' . $query;
+        $queryParams = http_build_query([
+            'limit' => $limit,
+            'page' => $page,
+            'query' => $query,
+        ], '', '&', PHP_QUERY_RFC3986);
+
+        $deploySiteEndpoint = $this->apiEndpoint . "/category?" . $queryParams;
 
         $client = new Client();
         $response = $client->createRequest()
