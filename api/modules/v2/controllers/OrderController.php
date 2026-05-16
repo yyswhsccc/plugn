@@ -1681,8 +1681,6 @@ class OrderController extends BaseController
             $order_model = Order::find()
                 ->where(['mashkor_order_number' => $mashkor_order_number])
                 ->andWhere(['not', ['mashkor_order_number' => null]])
-                ->andWhere(['not', ['mashkor_tracking_link' => null]])
-                ->andWhere(['not', ['mashkor_driver_name' => null]])
                 ->one();
 
             if ($order_model) {

@@ -110,13 +110,29 @@ class OrderCest
      */
     public function tryToStatusUpdateWebhook(FunctionalTester $I) {
         $order = $this->store->getOrders()->one();
+        $order->mashkor_tracking_link = null;
+        $order->mashkor_driver_name = null;
+        $order->mashkor_driver_phone = null;
+        $order->save(false);
 
         $I->wantTo('Validate order > status update webhook api');
         $I->sendPOST('v2/order/status-update-webhook', [
             "webhook_token" => "2125bf59e5af2b8c8b5e8b3b19f13e1221",
-            "order_number" => $order->mashkor_order_number
+            "order_number" => $order->mashkor_order_number,
+            "driver_name" => 'Mashkor Test Driver',
+            "driver_phone" => '+96512345678',
+            "tracking_link" => 'https://tracking.example.test/mashkor/order',
+            "order_status" => Order::MASHKOR_ORDER_STATUS_IN_DELIVERY
         ]);
         $I->seeResponseCodeIs(HttpCode::OK); // 200
+        $I->seeResponseContainsJson([
+            'operation' => 'success'
+        ]);
+
+        $order->refresh();
+        $I->assertEquals('Mashkor Test Driver', $order->mashkor_driver_name);
+        $I->assertEquals('https://tracking.example.test/mashkor/order', $order->mashkor_tracking_link);
+        $I->assertEquals(Order::STATUS_OUT_FOR_DELIVERY, $order->order_status);
     }
 
     /**
