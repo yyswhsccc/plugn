@@ -45,7 +45,11 @@ class GoogleMapComponent extends Component {
 
     public function getReverseGeocodeing($lat,$lng) {
 
-      $url = $this->apiEndpoint . '/geocode/json?latlng='. $lat . ',' . $lng . '&key=' . $this->token . '&language=en';
+      $url = $this->apiEndpoint . '/geocode/json?' . http_build_query([
+          'latlng' => $lat . ',' . $lng,
+          'key' => $this->token,
+          'language' => 'en',
+      ], '', '&', PHP_QUERY_RFC3986);
 
         $client = new Client();
         $response = $client->createRequest()
