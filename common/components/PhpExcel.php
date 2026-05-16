@@ -6,6 +6,7 @@ use yii\helpers\ArrayHelper;
 use yii\base\InvalidConfigException;
 use yii\base\InvalidParamException;
 use yii\i18n\Formatter;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
@@ -489,7 +490,7 @@ class PhpExcel extends \yii\base\Widget
                     } else {
                         $header = $model->getAttributeLabel($column);
                     }
-                    $activeSheet->setCellValue($col . $row, $header);
+                    $this->setExportCellValue($activeSheet, $col . $row, $header);
                     $colnum++;
                 }
                 $hasHeader = true;
@@ -517,7 +518,7 @@ class PhpExcel extends \yii\base\Widget
                 } else {
                     $column_value = $this->executeGetColumnData($model, ['attribute' => $column]);
                 }
-                $activeSheet->setCellValue($col . $row, $column_value);
+                $this->setExportCellValue($activeSheet, $col . $row, $column_value);
                 $colnum++;
             }
             $row++;
@@ -603,6 +604,19 @@ class PhpExcel extends \yii\base\Widget
             $value = $this->formatter()->format($value, $params['format']);
 
         return $value;
+    }
+
+    /**
+     * Write export values without allowing user-controlled spreadsheet formulas.
+     */
+    private function setExportCellValue($activeSheet, $cell, $value)
+    {
+        if (is_string($value) && preg_match('/^[=+\-@\t\r]/', $value)) {
+            $activeSheet->setCellValueExplicit($cell, "'" . $value, DataType::TYPE_STRING);
+            return;
+        }
+
+        $activeSheet->setCellValue($cell, $value);
     }
 
     /**
