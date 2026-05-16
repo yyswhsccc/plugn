@@ -422,13 +422,33 @@ class City extends \yii\db\ActiveRecord
      */
     public static function addByGoogleAPIResponse($url, $city_name = null, $area_name = null, $postal_code = null)
     {
-        $url .= '&key=' . Yii::$app->params['google_api_key'];
-        $url .= '&location_type=APPROXIMATE';
+        $url .= (strpos($url, '?') === false ? '?' : '&') . http_build_query([
+            'key' => Yii::$app->params['google_api_key'],
+            'location_type' => 'APPROXIMATE',
+        ], '', '&', PHP_QUERY_RFC3986);
 
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, str_replace(' ', '+', $url));
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = json_decode(curl_exec($ch));
+        $responseContent = curl_exec($ch);
+        if ($responseContent === false) {
+            Yii::error('Unable to fetch Google geocode response: ' . curl_error($ch), __METHOD__);
+            curl_close($ch);
+            return [
+                'operation' => 'error',
+                'message' => Yii::t('app', 'Sorry not able to find your city!')
+            ];
+        }
+        curl_close($ch);
+
+        $response = json_decode($responseContent);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Yii::error('Invalid Google geocode response: ' . json_last_error_msg(), __METHOD__);
+            return [
+                'operation' => 'error',
+                'message' => Yii::t('app', 'Sorry not able to find your city!')
+            ];
+        }
 
         if(isset($response->result))
             $response->results = [$response->result];
