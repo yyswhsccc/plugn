@@ -350,17 +350,14 @@ class AuthController extends BaseController {
 
         $token = Yii::$app->request->getBodyParam("idToken");
 
-        $ch = curl_init();
-        curl_setopt($ch, CURLOPT_URL, "https://www.googleapis.com/oauth2/v3/tokeninfo?id_token=" . $token);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-        $response = json_decode(curl_exec($ch));
+        if (!is_string($token) || trim($token) === '') {
+            return $this->invalidGoogleAccessTokenResponse();
+        }
 
-        if (empty($response->email)) {
-            return [
-                'operation' => 'error',
-                "code" => 1,
-                'message' => Yii::t('agent',"Invalid access token")
-            ];
+        $response = $this->fetchGoogleTokenInfo($token);
+
+        if (!is_object($response) || empty($response->email)) {
+            return $this->invalidGoogleAccessTokenResponse();
         }
 
         $model = Agent::find()
@@ -381,6 +378,44 @@ class AuthController extends BaseController {
         ]);
 
         return $this->_loginResponse($model);
+    }
+
+    private function fetchGoogleTokenInfo($token) {
+        $ch = curl_init();
+
+        if ($ch === false) {
+            return null;
+        }
+
+        $query = http_build_query(['id_token' => $token], '', '&', PHP_QUERY_RFC3986);
+
+        curl_setopt($ch, CURLOPT_URL, "https://www.googleapis.com/oauth2/v3/tokeninfo?" . $query);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+
+        $body = curl_exec($ch);
+        curl_close($ch);
+
+        if ($body === false || $body === '') {
+            return null;
+        }
+
+        $response = json_decode($body);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return null;
+        }
+
+        return $response;
+    }
+
+    private function invalidGoogleAccessTokenResponse() {
+        return [
+            'operation' => 'error',
+            "code" => 1,
+            'message' => Yii::t('agent',"Invalid access token")
+        ];
     }
 
     /**
@@ -1259,4 +1294,3 @@ class AuthController extends BaseController {
         ];
     }
 }
-
