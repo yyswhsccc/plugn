@@ -29,24 +29,29 @@ class ReCaptcha
     public function verify($token) {
 
         // Get initial IP address of requester
-        $ip = Yii::$app->request->getRemoteIP();
+        $ip = trim((string) Yii::$app->request->getRemoteIP());
 
         // Check if request is forwarded via load balancer or cloudfront on behalf of user
         if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $forwardedFor = $_SERVER['HTTP_X_FORWARDED_FOR'];
 
             // as "X-Forwarded-For" is usually a list of IP addresses that have routed
-            $IParray = array_values(array_filter(explode(',', $forwardedFor)));
+            $IParray = array_values(array_filter(array_map('trim', explode(',', $forwardedFor))));
 
             // Get the first ip from forwarded array to get original requester
-            $ip = $IParray[0];
+            if (!empty($IParray)) {
+                $ip = $IParray[0];
+            }
         }
 
         $data = [
             "secret" => $this->secretKey,
             "response" => $token,
-            "remoteip" => $ip
         ];
+
+        if (filter_var($ip, FILTER_VALIDATE_IP) !== false) {
+            $data["remoteip"] = $ip;
+        }
 
         $client = new Client();
 
