@@ -121,10 +121,27 @@ class Currency extends \yii\db\ActiveRecord
     public static function getDataFromApi($useTransaction = true) {
 
         $api_key = Yii::$app->params['currencylayer_api_key'];
+        $query = http_build_query([
+            'access_key' => $api_key,
+            'source' => 'USD',
+        ], '', '&', PHP_QUERY_RFC3986);
 
-        $response = file_get_contents('http://apilayer.net/api/live?access_key=' . $api_key . '&source=USD');
+        $response = @file_get_contents('https://apilayer.net/api/live?' . $query);
+        if ($response === false) {
+            Yii::error('Unable to fetch currency rates from CurrencyLayer.', __METHOD__);
+            return "no record found";
+        }
 
         $data = json_decode($response);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            Yii::error('Invalid CurrencyLayer response: ' . json_last_error_msg(), __METHOD__);
+            return "no record found";
+        }
+
+        if (isset($data->success) && $data->success === false) {
+            Yii::error('CurrencyLayer returned an error while updating rates.', __METHOD__);
+            return "no record found";
+        }
 
         $insertData = [];
         $currentData = include(Yii::getAlias('@common/fixtures/data/currency.php'));
