@@ -99,6 +99,8 @@ class JWT
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, "https://appleid.apple.com/auth/keys");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         $responseContent = curl_exec($ch);
         if ($responseContent === false) {
             Yii::error('Unable to fetch Apple public keys: ' . curl_error($ch), __METHOD__);

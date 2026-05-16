@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 from pathlib import Path
 
-source = Path("common/components/JWT.php").read_text()
+repo_root = Path(__file__).resolve().parents[1]
+source = (repo_root / "common/components/JWT.php").read_text()
 
 required_snippets = [
+    "curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);",
+    "curl_setopt($ch, CURLOPT_TIMEOUT, 10);",
     "$responseContent = curl_exec($ch);",
     "if ($responseContent === false)",
     "Yii::error('Unable to fetch Apple public keys: ' . curl_error($ch), __METHOD__);",
