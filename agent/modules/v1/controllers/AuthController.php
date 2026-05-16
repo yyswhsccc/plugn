@@ -356,7 +356,7 @@ class AuthController extends BaseController {
 
         $response = $this->fetchGoogleTokenInfo($token);
 
-        if (!is_object($response) || empty($response->email)) {
+        if (!is_object($response) || empty($response->email) || !$this->isGoogleTokenAudienceValid($response)) {
             return $this->invalidGoogleAccessTokenResponse();
         }
 
@@ -408,6 +408,26 @@ class AuthController extends BaseController {
         }
 
         return $response;
+    }
+
+    private function isGoogleTokenAudienceValid($response) {
+        if (empty($response->aud)) {
+            return false;
+        }
+
+        $clientId = $this->getGoogleOAuthClientId();
+
+        return $clientId !== '' && (string) $response->aud === $clientId;
+    }
+
+    private function getGoogleOAuthClientId() {
+        $clientId = Yii::$app->params['googleOAuthClientId'] ?? null;
+
+        if (!is_string($clientId) || trim($clientId) === '') {
+            $clientId = getenv('GOOGLE_OAUTH_CLIENT_ID') ?: getenv('GOOGLE_CLIENT_ID');
+        }
+
+        return is_string($clientId) ? trim($clientId) : '';
     }
 
     private function invalidGoogleAccessTokenResponse() {
