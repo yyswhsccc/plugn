@@ -10,6 +10,22 @@ use agent\models\BankDiscount;
 
 
 class BankDiscountController extends BaseController {
+    /**
+     * Keep validation details in server logs, not API responses.
+     */
+    private function bankDiscountErrorResponse(BankDiscount $model, $message, $context)
+    {
+        Yii::error('[BankDiscount] ' . $context . ' failed: ' . json_encode([
+            'bank_discount_id' => $model->bank_discount_id,
+            'restaurant_uuid' => $model->restaurant_uuid,
+            'errors' => $model->getErrors(),
+        ]), __METHOD__);
+
+        return [
+            "operation" => "error",
+            "message" => $message
+        ];
+    }
 
     /**
      * only owner will have access
@@ -117,10 +133,11 @@ class BankDiscountController extends BaseController {
         $model->minimum_order_amount = Yii::$app->request->getBodyParam("minimum_order_amount") ? Yii::$app->request->getBodyParam("minimum_order_amount") : 0;
 
         if (!$model->save()) {
-            return [
-                "operation" => "error",
-                "message" => $model->errors
-            ];
+            return $this->bankDiscountErrorResponse(
+                $model,
+                Yii::t ('agent',"We've faced a problem creating the bank discount"),
+                'create'
+            );
         }
 
         return [
@@ -172,17 +189,11 @@ class BankDiscountController extends BaseController {
 
          if (!$model->save())
          {
-             if (isset($model->errors)) {
-                 return [
-                     "operation" => "error",
-                     "message" => $model->errors
-                 ];
-             } else {
-                 return [
-                     "operation" => "error",
-                     "message" => Yii::t ('agent',"We've faced a problem updating the bank discount")
-                 ];
-             }
+             return $this->bankDiscountErrorResponse(
+                 $model,
+                 Yii::t ('agent',"We've faced a problem updating the bank discount"),
+                 'update'
+             );
          }
 
          return [
@@ -218,13 +229,14 @@ class BankDiscountController extends BaseController {
 
          if ($bankDiscountStatus) {
 
-              $bank_discount->bank_discount_status = $bankDiscountStatus;
+             $bank_discount->bank_discount_status = $bankDiscountStatus;
 
              if (!$bank_discount->save()) {
-                 return [
-                     "operation" => "error",
-                     "message" => $bank_discount->errors
-                 ];
+                 return $this->bankDiscountErrorResponse(
+                     $bank_discount,
+                     Yii::t ('agent',"We've faced a problem updating the bank discount status"),
+                     'update-status'
+                 );
              }
 
              return [
@@ -273,17 +285,11 @@ class BankDiscountController extends BaseController {
 
          if (!$model->delete())
          {
-             if (isset($model->errors)) {
-                 return [
-                     "operation" => "error",
-                     "message" => $model->errors
-                 ];
-             } else {
-                 return [
-                     "operation" => "error",
-                     "message" => Yii::t ('agent',"We've faced a problem deleting the bank discount")
-                 ];
-             }
+             return $this->bankDiscountErrorResponse(
+                 $model,
+                 Yii::t ('agent',"We've faced a problem deleting the bank discount"),
+                 'delete'
+             );
          }
 
          return [
