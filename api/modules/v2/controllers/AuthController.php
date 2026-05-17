@@ -231,9 +231,13 @@ class AuthController extends BaseController {
         $model->restaurant_uuid = $store_id;
 
         if(!$model->save()) {
+            $this->logAuthValidationErrors('signup', $model->errors, [
+                'store_uuid' => $store_id,
+            ]);
+
             return [
                 "operation" => "error",
-                "message" => $model->errors
+                "message" => Yii::t('api', 'Unable to create customer account.')
             ];
         }
 
@@ -323,9 +327,14 @@ class AuthController extends BaseController {
                 "unVerifiedToken" => $this->_loginResponse($customer)
             ];
         } else {
+            $this->logAuthValidationErrors('update-email', $customer->errors, [
+                'customer_id' => $customer->customer_id,
+                'store_uuid' => $store_id,
+            ]);
+
             return [
                 "operation" => "error",
-                "message" => $customer->errors
+                "message" => Yii::t('api', 'Unable to update customer email address.')
             ];
         }
     }
@@ -700,6 +709,19 @@ class AuthController extends BaseController {
             "name" => $customer->customer_name,
             "email" => $customer->customer_email,
         ];
+    }
+
+    /**
+     * Keep detailed validation diagnostics in logs while returning generic API errors.
+     * @param string $context
+     * @param array $errors
+     * @param array $metadata
+     */
+    private function logAuthValidationErrors($context, $errors, $metadata = []) {
+        Yii::error('[API Auth] ' . $context . ' validation failed: ' . json_encode([
+            'errors' => $errors,
+            'metadata' => $metadata,
+        ]), __METHOD__);
     }
 
     /**
