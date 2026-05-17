@@ -36,6 +36,7 @@ class ItemController extends Controller
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-item-image' => ['POST'],
                 ],
             ],
             'access' => [

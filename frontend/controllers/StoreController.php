@@ -37,6 +37,8 @@ class StoreController extends Controller
                 'class' => VerbFilter::className (),
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-logo-image' => ['POST'],
+                    'delete-thumbnail-image' => ['POST'],
                 ],
             ],
             'access' => [

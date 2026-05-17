@@ -26,6 +26,7 @@ class CategoryController extends Controller {
                 'class' => VerbFilter::className(),
                 'actions' => [
                     'delete' => ['POST'],
+                    'delete-category-image' => ['POST'],
                 ],
             ],
             'access' => [
