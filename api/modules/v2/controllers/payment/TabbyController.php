@@ -296,9 +296,9 @@ class TabbyController extends BaseController
         // direct call with redirect=1
         if ($redirect == 1) {
             if ($json['success']) {
-                $url = $order->restaurant->restaurant_domain . '/payment-success/' . $order->order_uuid;
+                $url = $this->buildRestaurantReturnUrl($order->restaurant, 'payment-success/' . $order->order_uuid);
             } else {
-                $url = $order->restaurant->restaurant_domain . '/payment-failed/' . $order->order_uuid;
+                $url = $this->buildRestaurantReturnUrl($order->restaurant, 'payment-failed/' . $order->order_uuid);
             }
 
             return Yii::$app->getResponse()->redirect($url)->send(301);

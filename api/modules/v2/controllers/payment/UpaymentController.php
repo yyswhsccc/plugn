@@ -394,7 +394,7 @@ class UpaymentController extends BaseController
 
             Payment::onPaymentCaptured($payment);
 
-            $url = $payment->restaurant->restaurant_domain . '/payment-success/' . $payment->order_uuid . '/' . $payment->payment_uuid;
+            $url = $this->buildRestaurantReturnUrl($payment->restaurant, 'payment-success/' . $payment->order_uuid . '/' . $payment->payment_uuid);
 
         } else {
             //notify tech team + vendor
@@ -403,7 +403,7 @@ class UpaymentController extends BaseController
 
             Payment::notifyTapError($payment, $status);
 
-            $url = $payment->restaurant->restaurant_domain . '/payment-failed/' . $payment->order_uuid;
+            $url = $this->buildRestaurantReturnUrl($payment->restaurant, 'payment-failed/' . $payment->order_uuid);
         }
 
         return Yii::$app->getResponse()->redirect($url)->send(301);

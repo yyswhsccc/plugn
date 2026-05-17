@@ -277,9 +277,9 @@ class StripeController extends BaseController
         $payment = $this->updateOrder();
 
         if ($payment) {
-            $url = $payment->restaurant->restaurant_domain . '/payment-success/' . $payment->order_uuid . '/' . $payment->payment_uuid;
+            $url = $this->buildRestaurantReturnUrl($payment->restaurant, 'payment-success/' . $payment->order_uuid . '/' . $payment->payment_uuid);
         } else {
-            $url = $payment->restaurant->restaurant_domain . '/payment-failed/' . $payment->order_uuid;
+            $url = $this->buildRestaurantReturnUrl(null, 'payment-failed');
         }
 
         return Yii::$app->getResponse()->redirect($url)->send(301);

@@ -1042,7 +1042,7 @@ class OrderController extends BaseController
 
                 $url = $paymentRecord->order && $paymentRecord->order->is_market_order?
                     'https://market.plugn.io/payment-failed/' . $paymentRecord->order_uuid:
-                    $paymentRecord->restaurant->restaurant_domain . '/payment-failed/' . $paymentRecord->order_uuid;
+                    $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-failed/' . $paymentRecord->order_uuid);
 
                 return Yii::$app->getResponse()->redirect($url)->send(301);
             }
@@ -1053,7 +1053,7 @@ class OrderController extends BaseController
 
             $url = $paymentRecord->order && $paymentRecord->order->is_market_order?
                 'https://market.plugn.io/payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid:
-                $paymentRecord->restaurant->restaurant_domain . '/payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid;
+                $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid);
 
             return Yii::$app->getResponse()->redirect($url)->send(301);
         } else {
@@ -1067,7 +1067,7 @@ class OrderController extends BaseController
 
             $url = $paymentRecord->order && $paymentRecord->order->is_market_order?
                 'https://market.plugn.io/payment-failed/' . $paymentRecord->order_uuid:
-                $paymentRecord->restaurant->restaurant_domain . '/payment-failed/' . $paymentRecord->order_uuid;
+                $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-failed/' . $paymentRecord->order_uuid);
 
             return Yii::$app->getResponse()->redirect($url)->send(301);
         }
@@ -1096,7 +1096,7 @@ class OrderController extends BaseController
 
                 $url = $paymentRecord->order && $paymentRecord->order->is_market_order?
                     'https://market.plugn.io/payment-failed/' . $paymentRecord->order_uuid:
-                    $paymentRecord->restaurant->restaurant_domain . '/payment-failed/' . $paymentRecord->order_uuid;
+                    $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-failed/' . $paymentRecord->order_uuid);
 
                 return Yii::$app->getResponse()->redirect($url)->send(301);
             }
@@ -1107,9 +1107,7 @@ class OrderController extends BaseController
             // $paymentRecord->order->changeOrderStatusToPending();
             $url = $paymentRecord->order && $paymentRecord->order->is_market_order ?
                 'https://market.plugn.io/payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid:
-                $paymentRecord->restaurant->restaurant_domain . '/payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid;
-
-            //return $this->redirect($paymentRecord->restaurant->restaurant_domain . '/payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid);
+                $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-success/' . $paymentRecord->order_uuid . '/' . $paymentRecord->payment_uuid);
 
             return Yii::$app->getResponse()->redirect($url)->send(301);
 
@@ -1123,7 +1121,7 @@ class OrderController extends BaseController
 
             $url = $paymentRecord->order && $paymentRecord->order->is_market_order?
                 'https://market.plugn.io/payment-failed/' . $paymentRecord->order_uuid:
-                $paymentRecord->restaurant->restaurant_domain . '/payment-failed/' . $paymentRecord->order_uuid;
+                $this->buildRestaurantReturnUrl($paymentRecord->restaurant, 'payment-failed/' . $paymentRecord->order_uuid);
 
             return Yii::$app->getResponse()->redirect($url)->send(301);
         }

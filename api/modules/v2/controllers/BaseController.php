@@ -8,6 +8,8 @@ use yii\rest\Controller;
 
 class BaseController extends Controller
 {
+    private const PAYMENT_RETURN_FALLBACK_URL = 'https://www.plugn.io';
+
     public function behaviors()
     {
         $behaviors = parent::behaviors();
@@ -79,5 +81,43 @@ class BaseController extends Controller
         }
 
         return true;
+    }
+
+    protected function buildRestaurantReturnUrl($restaurant, $path)
+    {
+        $domain = $restaurant && !empty($restaurant->restaurant_domain)
+            ? trim($restaurant->restaurant_domain)
+            : '';
+
+        if ($domain === '' || preg_match('/[\s\x00-\x1F\x7F]/', $domain)) {
+            Yii::warning('Missing or malformed restaurant payment return domain.', __METHOD__);
+
+            return self::PAYMENT_RETURN_FALLBACK_URL;
+        }
+
+        if (!preg_match('#^https?://#i', $domain)) {
+            $domain = 'https://' . ltrim($domain, '/');
+        }
+
+        $parts = @parse_url($domain);
+        $scheme = isset($parts['scheme']) ? strtolower($parts['scheme']) : null;
+
+        if (!$parts || empty($parts['host']) || !in_array($scheme, ['http', 'https'], true) || isset($parts['user']) || isset($parts['pass'])) {
+            Yii::warning('Unsafe restaurant payment return domain rejected: ' . $domain, __METHOD__);
+
+            return self::PAYMENT_RETURN_FALLBACK_URL;
+        }
+
+        $baseUrl = $scheme . '://' . $parts['host'];
+
+        if (!empty($parts['port'])) {
+            $baseUrl .= ':' . $parts['port'];
+        }
+
+        if (!empty($parts['path'])) {
+            $baseUrl .= '/' . trim($parts['path'], '/');
+        }
+
+        return rtrim($baseUrl, '/') . '/' . ltrim($path, '/');
     }
 }
