@@ -173,11 +173,7 @@ class ItemController extends BaseController
 
         if (!$model->save()) {
             $transaction->rollBack();
-            return [
-                "operation" => "error",
-                "message" => sizeof($model->errors) > 0 ? $model->errors:
-                    Yii::t('app', 'Error saving item detail')
-            ];
+            return $this->itemOperationError($model, __METHOD__, 'Error saving item detail', 'app');
         }
 
         if ($itemOptions && count($itemOptions) > 0) {
@@ -214,11 +210,7 @@ class ItemController extends BaseController
 
                 if (!$optionModel->save()) {
                     $transaction->rollBack();
-                    return [
-                        "operation" => "error",
-                        "message" => sizeof($optionModel->errors) > 0 ? $optionModel->errors:
-                            Yii::t('app', 'Error saving option')
-                    ];
+                    return $this->itemOperationError($optionModel, __METHOD__, 'Error saving option', 'app');
                 }
 
                 if ($option['extraOptions'] && count($option['extraOptions']) > 0) {
@@ -234,11 +226,7 @@ class ItemController extends BaseController
 
                         if (!$extraOptionModel->save()) {
                             $transaction->rollBack();
-                            return [
-                                "operation" => "error",
-                                "message" => sizeof($extraOptionModel->errors) > 0 ? $extraOptionModel->errors:
-                                    Yii::t('app', 'Error saving option value')
-                            ];
+                            return $this->itemOperationError($extraOptionModel, __METHOD__, 'Error saving option value', 'app');
                         }
                     }
                 }
@@ -295,11 +283,7 @@ class ItemController extends BaseController
             {
                 $transaction->rollBack();
 
-                return [
-                    "operation" => "error",
-                    "message" => sizeof($itemVariant->errors) > 0 ? $itemVariant->errors:
-                        Yii::t('app', 'Error saving item variant')
-                ];
+                return $this->itemOperationError($itemVariant, __METHOD__, 'Error saving item variant', 'app');
             }
 
 
@@ -351,11 +335,7 @@ class ItemController extends BaseController
                 {
                     $transaction->rollBack();
 
-                    return [
-                        "operation" => "error",
-                        "message" => sizeof($itemVariantOption->errors) > 0 ? $itemVariantOption->errors:
-                            Yii::t('app', 'Error saving item variant option')
-                    ];
+                    return $this->itemOperationError($itemVariantOption, __METHOD__, 'Error saving item variant option', 'app');
                 }
             }
         }
@@ -454,11 +434,7 @@ class ItemController extends BaseController
 
             if (!$model->save()) {
                 $transaction->rollBack();
-                return [
-                    "operation" => "error",
-                    "message" => sizeof($model->errors) > 0? $model->errors: 
-                        Yii::t('app', 'Error saving item detail')
-                ];
+                return $this->itemOperationError($model, __METHOD__, 'Error saving item detail', 'app');
             }
 
             $arrOptionIds = [];
@@ -501,11 +477,7 @@ class ItemController extends BaseController
 
                     if (!$optionModel->save()) {
                         $transaction->rollBack();
-                        return [
-                            "operation" => "error",
-                            "message" => sizeof($optionModel->errors) > 0? $optionModel->errors:
-                                Yii::t('app', 'Error saving option')
-                        ];
+                        return $this->itemOperationError($optionModel, __METHOD__, 'Error saving option', 'app');
                     }
 
                     $arrOptionIds[] =  $optionModel->option_id;
@@ -537,11 +509,7 @@ class ItemController extends BaseController
 
                             if (!$extraOptionModel->save()) {
                                 $transaction->rollBack();
-                                return [
-                                    "operation" => "error",
-                                    "message" => sizeof($extraOptionModel->errors) > 0? $extraOptionModel->errors:
-                                        Yii::t('app', 'Error saving option value')
-                                ];
+                                return $this->itemOperationError($extraOptionModel, __METHOD__, 'Error saving option value', 'app');
                             }
 
                             $arrExtraOptionIds[] = $extraOptionModel->extra_option_id;
@@ -627,11 +595,7 @@ class ItemController extends BaseController
                 {
                     $transaction->rollBack();
 
-                    return [
-                        "operation" => "error",
-                        "message" => sizeof($itemVariant->errors) > 0? $itemVariant->errors:
-                            Yii::t('app', 'Error saving item variant')
-                    ];
+                    return $this->itemOperationError($itemVariant, __METHOD__, 'Error saving item variant', 'app');
                 }
 
                 //add variant options
@@ -683,11 +647,7 @@ class ItemController extends BaseController
                     {
                         $transaction->rollBack();
 
-                        return [
-                            "operation" => "error",
-                            "message" => sizeof($itemVariantOption->errors) > 0? $itemVariantOption->errors:
-                                Yii::t('app', 'Error saving item variant option')
-                        ];
+                        return $this->itemOperationError($itemVariantOption, __METHOD__, 'Error saving item variant option', 'app');
                     }
 
                     $arrItemVariantOptionIds[] = $itemVariantOption->item_variant_option_uuid;
@@ -751,10 +711,7 @@ class ItemController extends BaseController
 
         if (!$model->save())
         {
-            return [
-                "operation" => "error",
-                "message" => $model->errors
-            ];
+            return $this->itemOperationError($model, __METHOD__, 'Unable to update item quantity. Please try again.');
         }
 
         return [
@@ -820,17 +777,7 @@ class ItemController extends BaseController
         $model = $this->findModel ($id);
 
         if (!$model->delete ()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => Yii::t('agent',"We've faced a problem deleting the item")
-                ];
-            }
+            return $this->itemOperationError($model, __METHOD__, "We've faced a problem deleting the item");
         }
 
         return [
@@ -882,17 +829,7 @@ class ItemController extends BaseController
         }
 
         if ($model && !$model->delete()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => "We've faced a problem deleting the item"
-                ];
-            }
+            return $this->itemOperationError($model, __METHOD__, "We've faced a problem deleting the item");
         }
 
         return [
@@ -950,17 +887,7 @@ class ItemController extends BaseController
         }
 
         if (!$model->delete()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => "We've faced a problem deleting the item"
-                ];
-            }
+            return $this->itemOperationError($model, __METHOD__, "We've faced a problem deleting the item");
         }
 
         return [
@@ -1013,17 +940,7 @@ class ItemController extends BaseController
         }
 
         if (!$model->delete()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => "We've faced a problem deleting the item"
-                ];
-            }
+            return $this->itemOperationError($model, __METHOD__, "We've faced a problem deleting the item");
         }
 
         return [
@@ -1179,22 +1096,26 @@ class ItemController extends BaseController
         $model->item_status = ($model->item_status == Item::ITEM_STATUS_PUBLISH) ? Item::ITEM_STATUS_UNPUBLISH : Item::ITEM_STATUS_PUBLISH;
 
         if (!$model->save ()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => Yii::t('agent',"We've faced a problem while status change of item")
-                ];
-            }
+            return $this->itemOperationError($model, __METHOD__, "We've faced a problem while status change of item");
         }
 
         return [
             "operation" => "success",
             "message" => Yii::t('agent',"Item status changed successfully")
+        ];
+    }
+
+    private function itemOperationError($model, $context, $message, $category = 'agent')
+    {
+        Yii::error([
+            'message' => 'Agent item operation failed',
+            'model' => get_class($model),
+            'errors' => $model->getErrors()
+        ], $context);
+
+        return [
+            "operation" => "error",
+            "message" => Yii::t($category, $message)
         ];
     }
 
