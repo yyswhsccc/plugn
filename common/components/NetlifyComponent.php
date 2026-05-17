@@ -104,11 +104,17 @@ class NetlifyComponent extends Component {
      */
     public function listSiteData($page, $query = '') {
 
-        $queryParams = http_build_query([
+        $query = trim((string) $query);
+        $queryParams = [
             'per_page' => 2,
             'page' => $page,
-            'name' => $query,
-        ], '', '&', PHP_QUERY_RFC3986);
+        ];
+
+        if ($query !== '') {
+            $queryParams['name'] = $query;
+        }
+
+        $queryParams = http_build_query($queryParams, '', '&', PHP_QUERY_RFC3986);
 
         $deploySiteEndpoint = $this->apiEndpoint . "/sites?" . $queryParams;
 
