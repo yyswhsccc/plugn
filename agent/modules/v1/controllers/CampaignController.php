@@ -89,10 +89,10 @@ class CampaignController extends BaseController
         $model->utm_term = Yii::$app->request->getBodyParam("term");
 
         if (!$model->save()) {
-            return [
-                "operation" => "error",
-                "message" => $model->errors
-            ];
+            return $this->campaignSaveFailedResponse(
+                $model,
+                "We've faced a problem creating the campaign"
+            );
         }
 
         return [
@@ -133,17 +133,10 @@ class CampaignController extends BaseController
         $model->utm_term = Yii::$app->request->getBodyParam("term");
 
         if (!$model->save()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => Yii::t('agent', "We've faced a problem updating the campaign")
-                ];
-            }
+            return $this->campaignSaveFailedResponse(
+                $model,
+                "We've faced a problem updating the campaign"
+            );
         }
 
         return [
@@ -172,17 +165,10 @@ class CampaignController extends BaseController
         $model = $this->findModel($id);
 
         if (!$model->delete()) {
-            if (isset($model->errors)) {
-                return [
-                    "operation" => "error",
-                    "message" => $model->errors
-                ];
-            } else {
-                return [
-                    "operation" => "error",
-                    "message" => Yii::t('agent', "We've faced a problem deleting the campaign")
-                ];
-            }
+            return $this->campaignSaveFailedResponse(
+                $model,
+                "We've faced a problem deleting the campaign"
+            );
         }
 
         return [
@@ -225,17 +211,36 @@ class CampaignController extends BaseController
             'utm_uuid' => $id
         ])->one();
 
+        if ($model === null) {
+            throw new NotFoundHttpException('The requested record does not exist.');
+        }
+
         $model->no_of_clicks = $model->no_of_clicks + 1;
 
         if(!$model->save()) {
-            return [
-                'operation' => "error",
-                "message" => $model->errors
-            ];
+            return $this->campaignSaveFailedResponse(
+                $model,
+                "We've faced a problem tracking the campaign click"
+            );
         }
 
         return [
             "operation" => "success"
+        ];
+    }
+
+    private function campaignSaveFailedResponse($model, $message)
+    {
+        Yii::error([
+            'message' => $message,
+            'campaign_uuid' => isset($model->utm_uuid) ? $model->utm_uuid : null,
+            'restaurant_uuid' => isset($model->restaurant_uuid) ? $model->restaurant_uuid : null,
+            'errors' => $model->errors,
+        ], __METHOD__);
+
+        return [
+            "operation" => "error",
+            "message" => Yii::t('agent', $message)
         ];
     }
 
