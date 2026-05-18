@@ -4,23 +4,23 @@ set -eu
 file="agent/modules/v1/controllers/AuthController.php"
 
 assert_contains() {
-    pattern="$1"
-    description="$2"
+	pattern="$1"
+	description="$2"
 
-    if ! grep -Fq "$pattern" "$file"; then
-        echo "Missing ${description}" >&2
-        exit 1
-    fi
+	if ! grep -Fq "$pattern" "$file"; then
+		echo "Missing ${description}" >&2
+		exit 1
+	fi
 }
 
 assert_absent() {
-    pattern="$1"
-    description="$2"
+	pattern="$1"
+	description="$2"
 
-    if grep -Fq "$pattern" "$file"; then
-        echo "Found forbidden ${description}" >&2
-        exit 1
-    fi
+	if grep -Fq "$pattern" "$file"; then
+		echo "Found forbidden ${description}" >&2
+		exit 1
+	fi
 }
 
 assert_absent "tokeninfo?id_token=\" . \$token" "raw Google tokeninfo URL concatenation"

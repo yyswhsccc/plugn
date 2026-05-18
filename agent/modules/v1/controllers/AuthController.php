@@ -380,6 +380,9 @@ class AuthController extends BaseController {
         return $this->_loginResponse($model);
     }
 
+    /**
+     * Fetches Google tokeninfo metadata for a validated ID token.
+     */
     private function fetchGoogleTokenInfo($token) {
         $ch = curl_init();
 
@@ -410,6 +413,9 @@ class AuthController extends BaseController {
         return $response;
     }
 
+    /**
+     * Verifies the token audience matches this application's Google client ID.
+     */
     private function isGoogleTokenAudienceValid($response) {
         if (empty($response->aud)) {
             return false;
@@ -420,6 +426,9 @@ class AuthController extends BaseController {
         return $clientId !== '' && (string) $response->aud === $clientId;
     }
 
+    /**
+     * Resolves the configured Google OAuth client ID from Yii params or environment.
+     */
     private function getGoogleOAuthClientId() {
         $clientId = Yii::$app->params['googleOAuthClientId'] ?? null;
 
@@ -430,6 +439,9 @@ class AuthController extends BaseController {
         return is_string($clientId) ? trim($clientId) : '';
     }
 
+    /**
+     * Returns the shared invalid Google token API response.
+     */
     private function invalidGoogleAccessTokenResponse() {
         return [
             'operation' => 'error',
