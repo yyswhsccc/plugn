@@ -13,7 +13,7 @@ class BankDiscountController extends BaseController {
     /**
      * Keep validation details in server logs, not API responses.
      */
-    private function bankDiscountErrorResponse(BankDiscount $model, $message, $context)
+    private function bankDiscountErrorResponse(BankDiscount $model, string $message, string $context): array
     {
         Yii::error('[BankDiscount] ' . $context . ' failed: ' . json_encode([
             'bank_discount_id' => $model->bank_discount_id,
