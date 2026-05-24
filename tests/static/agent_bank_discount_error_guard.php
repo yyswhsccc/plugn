@@ -27,7 +27,7 @@ if (strpos($source, 'bankDiscountErrorResponse') === false || strpos($source, 'Y
     exit(1);
 }
 
-if (strpos($source, "'operation' => \$context . ' failed without model validation errors'") === false) {
+if (!preg_match('/[\'"]operation[\'"]\s*=>\s*\$context\s*\.\s*[\'"] failed without model validation errors[\'"]/', $source)) {
     fwrite(STDERR, "Bank-discount failure logging must include a fallback when model errors are empty.\n");
     exit(1);
 }
