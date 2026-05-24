@@ -15,10 +15,15 @@ class BankDiscountController extends BaseController {
      */
     private function bankDiscountErrorResponse(BankDiscount $model, string $message, string $context): array
     {
+        $errors = $model->getErrors();
+        if (empty($errors)) {
+            $errors = ['operation' => $context . ' failed without model validation errors'];
+        }
+
         Yii::error('[BankDiscount] ' . $context . ' failed: ' . json_encode([
             'bank_discount_id' => $model->bank_discount_id,
             'restaurant_uuid' => $model->restaurant_uuid,
-            'errors' => $model->getErrors(),
+            'errors' => $errors,
         ]), __METHOD__);
 
         return [

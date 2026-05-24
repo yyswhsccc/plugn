@@ -27,4 +27,9 @@ if (strpos($source, 'bankDiscountErrorResponse') === false || strpos($source, 'Y
     exit(1);
 }
 
+if (strpos($source, "'operation' => \$context . ' failed without model validation errors'") === false) {
+    fwrite(STDERR, "Bank-discount failure logging must include a fallback when model errors are empty.\n");
+    exit(1);
+}
+
 echo "Bank discount error response guard passed.\n";
